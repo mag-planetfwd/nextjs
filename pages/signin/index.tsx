@@ -1,28 +1,31 @@
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
-import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
+import { useUser, useSupabaseClient, Session } from '@supabase/auth-helpers-react'
 import { useEffect, useState } from 'react'
+import { Database } from '../../types/supabase'
+type TestData = Database['public']['Tables']['test']['Row']
 
-const LoginPage = () => {
-    const supabaseClient = useSupabaseClient()
+
+export default function SignIn({ session }: { session: Session }) {
+    const supabase = useSupabaseClient<Database>()
     const user = useUser()
-    const [data, setData] = useState()
+    const [data, setData] = useState<TestData['name']>()
 
     useEffect(() => {
-        async function loadData() {
-            const { data } = await supabaseClient.from('test').select('*')
-            setData(data)
-        }
-        // Only run query once user is logged in.
-        if (user) loadData()
-    }, [user])
+        getTestData()
+    }, [session])
+
+    async function getTestData() {
+        const { data } = await supabase.from('test').select('name').single()
+        setData(data?.name)
+    }
 
     if (!user)
         return (
             <Auth
-                redirectTo="http://localhost:3000/"
+                redirectTo={process.env.REDIRECT_URL}
                 appearance={{ theme: ThemeSupa }}
-                supabaseClient={supabaseClient}
+                supabaseClient={supabase}
                 providers={['google']}
                 socialLayout="horizontal"
             />
@@ -30,7 +33,7 @@ const LoginPage = () => {
 
     return (
         <>
-            <button onClick={() => supabaseClient.auth.signOut()}>Sign out</button>
+            <button onClick={() => supabase.auth.signOut()}>Sign out</button>
             <p>user:</p>
             <pre>{JSON.stringify(user, null, 2)}</pre>
             <p>client-side data fetching with RLS</p>
@@ -38,5 +41,3 @@ const LoginPage = () => {
         </>
     )
 }
-
-export default LoginPage
