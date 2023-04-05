@@ -5,9 +5,7 @@ import Link from 'next/link'
 
 const navigation = [
   { name: 'React Flow', href: 'flow' },
-  { name: 'Features', href: '#' },
-  { name: 'Marketplace', href: '#' },
-  { name: 'Company', href: '#' },
+  { name: 'D3', href: 'd3' },
 ]
 
 export default function Example() {
